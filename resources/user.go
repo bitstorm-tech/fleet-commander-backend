@@ -45,5 +45,6 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(401)
 	} else {
 		fmt.Println("User login is valid, create JWT")
+		w.Write([]byte("ThisIsMySuperDuperCoolJWT!!!"))
 	}
 }
