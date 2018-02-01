@@ -9,3 +9,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/arangodb/go-driver"
+
+[[constraint]]
+  name = "github.com/gorilla/handlers"
+  version = "1.3.0"

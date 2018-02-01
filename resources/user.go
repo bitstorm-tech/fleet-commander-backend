@@ -1,26 +1,49 @@
 package resources
 
 import (
-	"encoding/json"
 	"fleet-commander-backend-go/models"
+	"fleet-commander-backend-go/persistence"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-    "fleet-commander-backend-go/persistence"
 )
 
-// UserPostHandler handles the POST requests
-func UserPostHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
+// UserCreateHandler creates a new user in the database
+func UserCreateHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := models.UserFromRequest(r)
 	if err != nil {
-		fmt.Println("ERROR: Can't read request body")
+		fmt.Println("ERROR: Can't extract user from http request", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	err = persistence.InsertNewUser(user)
+	if err != nil {
+		fmt.Println("ERROR: Can't insert new user", err)
 		w.WriteHeader(500)
 	}
+}
 
-	user := new(models.User)
-	if json.Unmarshal(b, user) != nil {
-		fmt.Println("ERROR: Can't unmarshal request body:", string(b))
+// UserLoginHandler checks if the submitted user is valid and returns
+// a JWT token if that is the case
+func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := models.UserFromRequest(r)
+	if err != nil {
+		fmt.Println("ERROR: Can't extract user from http request", err)
+		w.WriteHeader(500)
+		return
 	}
 
-	persistence.UpsertUser(user)
+	userFromDb, err := persistence.GetUserByEmail(user.Email)
+	if err != nil {
+		fmt.Println("ERROR: No user found in database")
+		w.WriteHeader(401)
+		return
+	}
+
+	if userFromDb.Password != user.GetPasswordHash() {
+		fmt.Println("ERROR: Invalid password")
+		w.WriteHeader(401)
+	} else {
+		fmt.Println("User login is valid, create JWT")
+	}
 }
