@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("Server startup ...")
 	router := mux.NewRouter()
-	router.HandleFunc("/users", resources.UserCreateHandler).Methods("POST")
+	router.HandleFunc("/users", resources.UserCreateHandler).Methods("PUT")
 	router.HandleFunc("/users/login", resources.UserLoginHandler).Methods("POST")
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS", "PUT", "HEAD", "DELETE"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"x-requested-with", "authorization", "content-type"})

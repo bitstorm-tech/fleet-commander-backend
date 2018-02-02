@@ -18,8 +18,8 @@ func InsertNewUser(user *models.User) error {
 	user.Password = passwordHash
 	fmt.Println("Insert new user:", user)
 
-	database := newArangoDatabase()
-	query := "FOR u IN users FILTER LOWER(u.Email) == LOWER(@email) AND LOWER(u.Username) == LOWER(@username) RETURN u"
+	database := getArangoDatabase()
+	query := "FOR u IN users FILTER LOWER(u.Email) == LOWER(@email) OR LOWER(u.Username) == LOWER(@username) RETURN u"
 	bindings := bindingVariables{
 		"email":    user.Email,
 		"username": user.Username,
@@ -33,7 +33,7 @@ func InsertNewUser(user *models.User) error {
 
 	if cursor.HasMore() {
 		fmt.Println("WARN: user already exists")
-		return fmt.Errorf("User with username=%s and email=%s already exists", user.Username, user.Email)
+		return fmt.Errorf("User with username=%s or email=%s already exists", user.Username, user.Email)
 	}
 
 	collection, err := database.Collection(nil, "users")
@@ -55,7 +55,7 @@ func InsertNewUser(user *models.User) error {
 func GetUserByEmail(email string) (*models.User, error) {
 	fmt.Println("Get user by email:", email)
 
-	database := newArangoDatabase()
+	database := getArangoDatabase()
 	query := "FOR u IN users FILTER LOWER(u.Email) == LOWER(@email) RETURN u"
 	bindings := bindingVariables{
 		"email": email,
