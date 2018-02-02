@@ -27,7 +27,7 @@ func InsertNewUser(user *models.User) error {
 
 	cursor, err := database.Query(nil, query, bindings)
 	if err != nil {
-		fmt.Println("ERROR: invalid query", err)
+		fmt.Println("ERROR: invalid query:", err)
 		return err
 	}
 
@@ -38,13 +38,13 @@ func InsertNewUser(user *models.User) error {
 
 	collection, err := database.Collection(nil, "users")
 	if err != nil {
-		fmt.Println("ERROR: can't open collection", err)
+		fmt.Println("ERROR: can't open collection:", err)
 		return err
 	}
 
 	_, err = collection.CreateDocument(nil, user)
 	if err != nil {
-		fmt.Println("ERROR: can't create user", err)
+		fmt.Println("ERROR: can't create user:", err)
 		return err
 	}
 
@@ -66,15 +66,15 @@ func GetUserByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 
-	if cursor.Count() > 1 {
-		fmt.Printf("WARN: found (%d) users, will use first one", cursor.Count())
-	}
-
 	user := new(models.User)
 	_, err = cursor.ReadDocument(nil, user)
 	if err != nil {
-		fmt.Println("ERROR: can't read user from cursor", err)
+		fmt.Println("ERROR: can't read user from cursor:", err)
 		return nil, err
+	}
+
+	if cursor.HasMore() {
+		fmt.Printf("ERROR: found multiple users with email %s, will use first one\n", email)
 	}
 
 	return user, nil
