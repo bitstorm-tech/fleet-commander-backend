@@ -13,7 +13,6 @@ type User struct {
 	Username string
 	Password string
 	Email    string
-	JWT      string
 }
 
 // GetPasswordHash returns the user password as hex encoded SHA-512 hash string
