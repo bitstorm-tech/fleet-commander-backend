@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -15,6 +16,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
+var expireTime = int64(1000 * 60 * 60 * 24)
 var signatureKey = []byte("eewOb9oQBZu8RFUmmVfkhwkdhU9l09bN")
 
 // UserCreateHandler creates a new user in the database
@@ -62,7 +64,7 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		claims := claims{
 			user.Email,
 			jwt.StandardClaims{
-				ExpiresAt: 15000,
+				ExpiresAt: time.Now().Unix()*1000 + expireTime,
 			},
 		}
 		jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
