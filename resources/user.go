@@ -1,14 +1,14 @@
 package resources
 
 import (
-	"fleet-commander-backend-go/models"
-	"fleet-commander-backend-go/persistence"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/models"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/persistence"
 )
 
 type claims struct {

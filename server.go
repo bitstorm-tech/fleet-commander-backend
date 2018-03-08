@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fleet-commander-backend-go/resources"
-	"net/http"
-
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/resources"
 )
 
 func main() {
