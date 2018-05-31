@@ -12,7 +12,7 @@ import (
 
 func main() {
 	fmt.Println("Server startup ...")
-	arango.CheckConnection()
+	arango.Connect()
 	router := mux.NewRouter()
 	router.HandleFunc("/users", resources.UserCreateHandler).Methods("PUT")
 	router.HandleFunc("/users/login", resources.UserLoginHandler).Methods("POST")
