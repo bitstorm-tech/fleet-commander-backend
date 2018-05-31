@@ -8,7 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/models"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/persistence"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 )
 
 type claims struct {
@@ -28,7 +28,7 @@ func UserCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = persistence.InsertNewUser(user)
+	err = arango.InsertNewUser(user)
 	if err != nil {
 		fmt.Println("ERROR: can't insert new user:", err)
 		if strings.Contains(err.Error(), "already exists") {
@@ -49,7 +49,7 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromDb, err := persistence.GetUserByEmail(user.Email)
+	userFromDb, err := arango.GetUserByEmail(user.Email)
 	if err != nil {
 		fmt.Println("ERROR: no user found in database:", err)
 		w.WriteHeader(401)

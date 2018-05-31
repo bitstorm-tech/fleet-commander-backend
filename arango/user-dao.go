@@ -1,4 +1,4 @@
-package persistence
+package arango
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ func InsertNewUser(user *models.User) error {
 	user.Password = passwordHash
 	fmt.Println("Insert new user:", user)
 
-	database := getArangoDatabase()
+	database := getDatabase()
 	query := "FOR u IN users FILTER LOWER(u.Email) == LOWER(@email) OR LOWER(u.Username) == LOWER(@username) RETURN u"
 	bindings := bindingVariables{
 		"email":    user.Email,
@@ -34,7 +34,7 @@ func InsertNewUser(user *models.User) error {
 
 	if cursor.HasMore() {
 		fmt.Println("WARN: user already exists")
-		return fmt.Errorf("User with username=%s or email=%s already exists", user.Username, user.Email)
+		return fmt.Errorf("user with username=%s or email=%s already exists", user.Username, user.Email)
 	}
 
 	collection, err := database.Collection(nil, "users")
@@ -56,7 +56,7 @@ func InsertNewUser(user *models.User) error {
 func GetUserByEmail(email string) (*models.User, error) {
 	fmt.Println("Get user by email:", email)
 
-	database := getArangoDatabase()
+	database := getDatabase()
 	query := "FOR u IN users FILTER LOWER(u.Email) == LOWER(@email) RETURN u"
 	bindings := bindingVariables{
 		"email": email,

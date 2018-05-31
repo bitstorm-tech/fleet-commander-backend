@@ -7,10 +7,12 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/resources"
+    "gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 )
 
 func main() {
 	fmt.Println("Server startup ...")
+	arango.CheckConnection()
 	router := mux.NewRouter()
 	router.HandleFunc("/users", resources.UserCreateHandler).Methods("PUT")
 	router.HandleFunc("/users/login", resources.UserLoginHandler).Methods("POST")

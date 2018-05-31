@@ -1,20 +1,31 @@
-package persistence
+package arango
 
 import (
 	"fmt"
 	"os"
 
-	driver "github.com/arangodb/go-driver"
+	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
 )
 
 type bindingVariables map[string]interface{}
 
-var arangoClient driver.Client
-var arangoDatabase driver.Database
-var arangoCollections map[string]driver.Collection
+var (
+	arangoClient      driver.Client
+	arangoDatabase    driver.Database
+	arangoCollections map[string]driver.Collection
+)
 
-func getArangoClient() driver.Client {
+// Connect tries to get a arango client. If this is not possible, it
+// will will exit. If the arango client is already crated, nothing
+// happens.
+func Connect() {
+    if arangoClient != nil {
+        arangoClient = getClient()
+    }
+}
+
+func getClient() driver.Client {
 	if arangoClient == nil {
 		fmt.Println("Initializing ArangoDB client")
 		endpoint := "http://localhost:8529"
@@ -44,10 +55,10 @@ func getArangoClient() driver.Client {
 	return arangoClient
 }
 
-func getArangoDatabase() driver.Database {
+func getDatabase() driver.Database {
 	if arangoDatabase == nil {
 		fmt.Println("Initializing ArangoDB database")
-		client := getArangoClient()
+		client := getClient()
 		var err error
 		arangoDatabase, err = client.Database(nil, "fleet-commander")
 		if err != nil {
@@ -59,10 +70,10 @@ func getArangoDatabase() driver.Database {
 	return arangoDatabase
 }
 
-func getArangoCollection(name string) driver.Collection {
+func getCollection(name string) driver.Collection {
 	if arangoCollections[name] == nil {
 		fmt.Println("Initialize ArangoDB collection:", name)
-		database := getArangoDatabase()
+		database := getDatabase()
 		collection, err := database.Collection(nil, name)
 		if err != nil {
 			fmt.Println("ERROR: can't get collection", name, err)
