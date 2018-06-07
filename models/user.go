@@ -10,18 +10,19 @@ import (
 
 // User is the structure represents a user from the database
 type User struct {
-	Username string
-	Password string
-	Email    string
+	Username string `json:"username,omitempty"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 // GetPasswordHash returns the user password as hex encoded SHA-512 hash string
-func (user *User) GetPasswordHash() string {
+func (user *User) PasswordHash() string {
 	sha := crypto.SHA512.New()
-	_, err := sha.Write([]byte(user.Password))
-	if err != nil {
+	if _, err := sha.Write([]byte(user.Password)); err != nil {
+		fmt.Println("ERROR: can't generate password hash:", err)
 		return ""
 	}
+
 	hash := sha.Sum(nil)
 
 	return fmt.Sprintf("%x", hash)
