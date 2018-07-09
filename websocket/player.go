@@ -37,3 +37,7 @@ func (player *connectedPlayer) SendMessage(message *Message) error {
 
 	return nil
 }
+
+func (player *connectedPlayer) SendTechnicalErrorMessage() {
+	player.SendMessage(NewErrorMessage("Sorry, we have some problems with our engines, please try again later"))
+}

@@ -2,15 +2,19 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/arangodb/go-driver"
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 )
 
 func main() {
-	client := arango.Connect()
+	client, err := arango.GetClient()
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		return
+	}
 
 	database, _ := client.Database(nil, arango.DatabaseName)
 
@@ -19,18 +23,40 @@ func main() {
 		database.Remove(nil)
 	}
 
-	fmt.Println("Creating new database")
-	database, err := client.CreateDatabase(nil, arango.DatabaseName, nil)
-
+	fmt.Println("Creating database:", arango.DatabaseName)
+	database, err = client.CreateDatabase(nil, arango.DatabaseName, nil)
 	if err != nil {
-		log.Panic(err)
+		fmt.Printf("%+v\n", err)
+		return
 	}
 
-	fmt.Println("Creating user collection")
-	_, err = database.CreateCollection(nil, "users", nil)
+	fmt.Println("Creating collection:", arango.CollectionUser)
+	if _, err = database.CreateCollection(nil, arango.CollectionUser, nil); err != nil {
+		fmt.Printf("%+v\n", err)
+		return
+	}
 
+	fmt.Println("Creating collection:", arango.CollectionResource)
+	if _, err = database.CreateCollection(nil, arango.CollectionResource, nil); err != nil {
+		fmt.Printf("%+v\n", err)
+		return
+	}
+
+	fmt.Println("Creating graph:", arango.GraphName)
+	graph, err := database.CreateGraph(nil, arango.GraphName, nil)
 	if err != nil {
-		log.Panic(err)
+		fmt.Printf("%+v\n", err)
+		return
+	}
+
+	fmt.Println("Creating edge:", arango.EdgeHasResources)
+	vertexConstraints := driver.VertexConstraints{
+		From: []string{arango.CollectionUser},
+		To:   []string{arango.CollectionResource},
+	}
+
+	if _, err := graph.CreateEdgeCollection(nil, arango.EdgeHasResources, vertexConstraints); err != nil {
+		fmt.Printf("%+v\n", err)
 	}
 }
 

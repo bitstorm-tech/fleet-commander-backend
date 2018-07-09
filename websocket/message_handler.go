@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"time"
+
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/models"
 )
 
-var technicalErrorMessage = NewErrorMessage("Sorry, we have some problems with our engines, please try again later")
-
 func handleMessages(player *connectedPlayer) {
+	go heardBeat(player)
+
 	for {
 		message, err := player.NextMessage()
 		if err != nil {
@@ -30,10 +31,10 @@ func handleMessages(player *connectedPlayer) {
 }
 
 func signIn(payload *json.RawMessage, player *connectedPlayer) {
-	user := new(models.User)
+	user := new(arango.User)
 	if err := json.Unmarshal(*payload, user); err != nil {
 		fmt.Println("ERROR: can't unmarshal sign in payload:", err)
-		player.SendMessage(technicalErrorMessage)
+		player.SendTechnicalErrorMessage()
 		return
 	}
 
@@ -42,31 +43,61 @@ func signIn(payload *json.RawMessage, player *connectedPlayer) {
 		if err == arango.NoUserFoundError {
 			player.SendMessage(NewErrorMessage("Invalid credentials"))
 		} else {
-			player.SendMessage(technicalErrorMessage)
+			player.SendTechnicalErrorMessage()
 		}
 	} else if user.PasswordHash() != userFromDb.Password {
 		player.SendMessage(NewErrorMessage("Invalid credentials"))
 	} else {
 		player.SendMessage(NewSignInMessage())
 	}
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+	}
 }
 
 func signUp(payload *json.RawMessage, player *connectedPlayer) {
-	user := new(models.User)
+	user := new(arango.User)
 	if err := json.Unmarshal(*payload, user); err != nil {
 		fmt.Println("ERROR: can't unmarshal sign up payload:", err)
-		player.SendMessage(technicalErrorMessage)
+		player.SendTechnicalErrorMessage()
 		return
 	}
 
-	if err := arango.InsertNewUser(user); err != nil {
+	user, err := arango.InsertNewUser(user)
+	if err != nil {
 		fmt.Println("ERROR: can't insert new user:", err)
 		if err == arango.UserAlreadyExistsError {
 			player.SendMessage(NewErrorMessage("User already exists"))
 		} else {
-			player.SendMessage(technicalErrorMessage)
+			player.SendTechnicalErrorMessage()
 		}
-	} else {
-		player.SendMessage(NewSignUpMessage())
+		return
+	}
+
+	resources, err := arango.NewResources()
+	if err != nil {
+		fmt.Println("ERROR: can't create new resources:", err)
+		player.SendTechnicalErrorMessage()
+		arango.RemoveDocument(user)
+		return
+	}
+
+	err = arango.CreateEdge(user, resources, arango.EdgeHasResources)
+	if err != nil {
+		fmt.Println("ERROR: can't create edge:", err)
+		arango.RemoveDocument(user)
+		arango.RemoveDocument(resources)
+		player.SendTechnicalErrorMessage()
+		return
+	}
+
+	player.SendMessage(NewSignUpMessage())
+}
+
+func heardBeat(player *connectedPlayer) {
+	for {
+
+		time.Sleep(5 * time.Second)
 	}
 }

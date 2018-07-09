@@ -1,15 +1,13 @@
-package models
+package arango
 
 import (
 	"crypto"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
 
 // User is the structure represents a user from the database
 type User struct {
+	Key_     string `json:"_key"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
@@ -28,20 +26,18 @@ func (user *User) PasswordHash() string {
 	return fmt.Sprintf("%x", hash)
 }
 
-// UserFromRequest extracts the user from a request
-func UserFromRequest(r *http.Request) (*User, error) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("ERROR: can't read request body", err)
-		return nil, err
+func (User) Collection() string {
+	return CollectionUser
+}
+
+func (user *User) ID() string {
+	if len(user.Key()) == 0 {
+		return ""
 	}
 
-	user := new(User)
-	err = json.Unmarshal(b, user)
-	if err != nil {
-		fmt.Println("ERROR: can't unmarshal request body:", string(b), err)
-		return nil, err
-	}
+	return user.Collection() + "/" + user.Key()
+}
 
-	return user, nil
+func (user *User) Key() string {
+	return user.Key_
 }
