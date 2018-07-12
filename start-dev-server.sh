@@ -1,20 +1,23 @@
 #!/bin/sh
 
-function restart {
-	printf "\033c"
-	go build -o build/fc
-	./build/fc &
-}
+EXCLUDES="-e './.git' -e './.idea' -e './vendor' -e './build'"
+EXEC_NAME="fleet-commander___"
 
 function killExec {
-	kill $!
+	kill `pgrep -f "$EXEC_NAME"`
 }
 
-trap killExec EXIT
+function start {
+	printf "\033c"
+	vgo build -o build/$EXEC_NAME
+	./build/$EXEC_NAME &	
+}
 
-restart
+start
 
-while inotifywait -qq -r -e modify . @./.git @./.idea @./vendor @./build; do
+fswatch -i 0,2 -o --event=Updated -e $EXCLUDES ./ | while read; do
 	killExec
-	restart
+	start
 done
+
+killExec
