@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -10,6 +10,15 @@ import (
 )
 
 func main() {
+	flag.Bool("drop", false, "drops the database before creating a new one")
+	flag.Bool("help", false, "shows this help")
+	flag.Parse()
+
+	if flagPresent("help") {
+		flag.Usage()
+		return
+	}
+
 	client, err := arango.GetClient()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -18,7 +27,7 @@ func main() {
 
 	database, _ := client.Database(nil, arango.DatabaseName)
 
-	if withParameter("drop") && database != nil {
+	if flagPresent("drop") && database != nil {
 		fmt.Println("Dropping existing database!")
 		database.Remove(nil)
 	}
@@ -60,9 +69,11 @@ func main() {
 	}
 }
 
-func withParameter(parameter string) bool {
-	for i := 0; i < len(os.Args); i++ {
-		if strings.ToLower(os.Args[i]) == strings.ToLower(parameter) {
+func flagPresent(_flag string) bool {
+	flags := flag.Args()
+
+	for i := 0; i < len(flags); i++ {
+		if strings.ToLower(flags[i]) == strings.ToLower(_flag) {
 			return true
 		}
 	}
