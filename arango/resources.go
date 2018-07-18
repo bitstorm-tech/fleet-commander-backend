@@ -4,26 +4,32 @@ import (
 	"time"
 )
 
+const (
+	resourcesCollectionName = "resources"
+)
+
 type Resources struct {
-	Key_       string    `json:"_key"`
+	Key        string    `json:"_key,omitempty"`
+	ID         string    `json:"_id,omitempty"`
 	Titanium   int       `json:"titanium"`
 	Fuel       int       `json:"fuel"`
 	Energy     int       `json:"energy"`
 	LastUpdate time.Time `json:"lastUpdate"`
 }
 
-func (Resources) Collection() string {
-	return CollectionResource
+func (Resources) collection() string {
+	return resourcesCollectionName
 }
 
-func (resources *Resources) Key() string {
-	return resources.Key_
+func (r *Resources) key() string {
+	return r.Key
 }
 
-func (resources *Resources) ID() string {
-	if len(resources.Key()) == 0 {
-		return ""
-	}
+func (r *Resources) id() string {
+	return r.ID
+}
 
-	return resources.Collection() + "/" + resources.Key()
+func (r *Resources) setKey(key string) {
+	r.Key = key
+	r.ID = r.collection() + "/" + key
 }

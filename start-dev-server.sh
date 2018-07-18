@@ -3,8 +3,8 @@
 EXCLUDES="-e './.git' -e './.idea' -e './vendor' -e './build'"
 EXEC_NAME="fleet-commander___"
 
-function killExec {
-	kill `pgrep -f "$EXEC_NAME"`
+function stop {
+	pkill -f $EXEC_NAME
 }
 
 function start {
@@ -15,9 +15,9 @@ function start {
 
 start
 
-fswatch -i 0,2 -o --event=Updated -e $EXCLUDES ./ | while read; do
-	killExec
+fswatch -i 0,2 -o --event=Updated -e $EXCLUDES . | while read; do
+	stop
 	start
 done
 
-killExec
+stop

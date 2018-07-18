@@ -20,12 +20,12 @@ func InsertNewUser(user *User) (*User, error) {
 	user.Password = passwordHash
 	fmt.Println("Insert new user:", user)
 
-	database, err := GetDatabase()
+	database, err := getDatabase()
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %v\n", user)
+		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
-	query := fmt.Sprintf("FOR u IN %s FILTER LOWER(u.email) == LOWER(@email) OR LOWER(u.username) == LOWER(@username) RETURN u", CollectionUser)
+	query := fmt.Sprintf("FOR u IN %s FILTER LOWER(u.email) == LOWER(@email) OR LOWER(u.username) == LOWER(@username) RETURN u", userCollectionName)
 	bindings := bindingVariables{
 		"email":    user.Email,
 		"username": user.Username,
@@ -33,7 +33,7 @@ func InsertNewUser(user *User) (*User, error) {
 
 	cursor, err := database.Query(nil, query, bindings)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %v\n", user)
+		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
 	if cursor.HasMore() {
@@ -42,7 +42,7 @@ func InsertNewUser(user *User) (*User, error) {
 	}
 
 	if err = CreateDocument(user); err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %v\n", user)
+		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
 	return user, nil
@@ -52,18 +52,18 @@ func InsertNewUser(user *User) (*User, error) {
 func GetUserByEmail(email string) (*User, error) {
 	fmt.Println("Get user by email:", email)
 
-	database, err := GetDatabase()
+	database, err := getDatabase()
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while getting user by email: %v\n", email)
+		return nil, errors.Wrapf(err, "error while getting user by email: %+v", email)
 	}
 
-	query := fmt.Sprintf("FOR u IN %s FILTER LOWER(u.email) == LOWER(@email) RETURN u", CollectionUser)
+	query := fmt.Sprintf("FOR u IN %s FILTER LOWER(u.email) == LOWER(@email) RETURN u", userCollectionName)
 	bindings := bindingVariables{
 		"email": email,
 	}
 	cursor, err := database.Query(nil, query, bindings)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while getting user by email: %v\n", email)
+		return nil, errors.Wrapf(err, "error while getting user by email: %+v", email)
 	}
 
 	user := new(User)

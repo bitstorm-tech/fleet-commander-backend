@@ -15,7 +15,7 @@ func handleMessages(player *connectedPlayer) {
 	for {
 		message, err := player.NextMessage()
 		if err != nil {
-			fmt.Println("ERROR: can't read message from websocket:", err)
+			fmt.Printf("ERROR: can't read message from websocket \n%+v", err)
 			player.connection.Close()
 			break
 		}
@@ -33,7 +33,7 @@ func handleMessages(player *connectedPlayer) {
 func signIn(payload *json.RawMessage, player *connectedPlayer) {
 	user := new(arango.User)
 	if err := json.Unmarshal(*payload, user); err != nil {
-		fmt.Println("ERROR: can't unmarshal sign in payload:", err)
+		fmt.Printf("ERROR: can't unmarshal sign in payload \n%+v", err)
 		player.SendTechnicalErrorMessage()
 		return
 	}
@@ -52,21 +52,21 @@ func signIn(payload *json.RawMessage, player *connectedPlayer) {
 	}
 
 	if err != nil {
-		fmt.Printf("%+v\n", err)
+		fmt.Printf("%+v", err)
 	}
 }
 
 func signUp(payload *json.RawMessage, player *connectedPlayer) {
 	user := new(arango.User)
 	if err := json.Unmarshal(*payload, user); err != nil {
-		fmt.Println("ERROR: can't unmarshal sign up payload:", err)
+		fmt.Printf("ERROR: can't unmarshal sign up payload \n%+v", err)
 		player.SendTechnicalErrorMessage()
 		return
 	}
 
 	user, err := arango.InsertNewUser(user)
 	if err != nil {
-		fmt.Println("ERROR: can't insert new user:", err)
+		fmt.Printf("ERROR: can't insert new user \n%+v", err)
 		if err == arango.UserAlreadyExistsError {
 			player.SendMessage(NewErrorMessage("User already exists"))
 		} else {
@@ -75,9 +75,9 @@ func signUp(payload *json.RawMessage, player *connectedPlayer) {
 		return
 	}
 
-	resources, err := arango.NewResources()
-	if err != nil {
-		fmt.Println("ERROR: can't create new resources:", err)
+	resources := new(arango.Resources)
+	if err = arango.CreateDocument(resources); err != nil {
+		fmt.Printf("ERROR: can't create new resources \n%+v", err)
 		player.SendTechnicalErrorMessage()
 		arango.RemoveDocument(user)
 		return
@@ -85,7 +85,7 @@ func signUp(payload *json.RawMessage, player *connectedPlayer) {
 
 	err = arango.CreateEdge(user, resources, arango.EdgeHasResources)
 	if err != nil {
-		fmt.Println("ERROR: can't create edge:", err)
+		fmt.Printf("ERROR: can't create edge \n%+v", err)
 		arango.RemoveDocument(user)
 		arango.RemoveDocument(resources)
 		player.SendTechnicalErrorMessage()
@@ -97,7 +97,6 @@ func signUp(payload *json.RawMessage, player *connectedPlayer) {
 
 func heardBeat(player *connectedPlayer) {
 	for {
-
 		time.Sleep(5 * time.Second)
 	}
 }

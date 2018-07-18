@@ -5,18 +5,23 @@ import (
 	"fmt"
 )
 
+const (
+	userCollectionName = "user"
+)
+
 // User is the structure represents a user from the database
 type User struct {
-	Key_     string `json:"_key"`
+	Key      string `json:"_key,omitempty"`
+	ID       string `json:"_id,omitempty"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
 
-// GetPasswordHash returns the user password as hex encoded SHA-512 hash string
-func (user *User) PasswordHash() string {
+// PasswordHash returns the user password as hex encoded SHA-512 hash string
+func (u *User) PasswordHash() string {
 	sha := crypto.SHA512.New()
-	if _, err := sha.Write([]byte(user.Password)); err != nil {
+	if _, err := sha.Write([]byte(u.Password)); err != nil {
 		fmt.Println("ERROR: can't generate password hash:", err)
 		return ""
 	}
@@ -26,18 +31,19 @@ func (user *User) PasswordHash() string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func (User) Collection() string {
-	return CollectionUser
+func (User) collection() string {
+	return userCollectionName
 }
 
-func (user *User) ID() string {
-	if len(user.Key()) == 0 {
-		return ""
-	}
-
-	return user.Collection() + "/" + user.Key()
+func (u *User) key() string {
+	return u.Key
 }
 
-func (user *User) Key() string {
-	return user.Key_
+func (u *User) id() string {
+	return u.ID
+}
+
+func (u *User) setKey(key string) {
+	u.Key = key
+	u.ID = u.collection() + "/" + key
 }
