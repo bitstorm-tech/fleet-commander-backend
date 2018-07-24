@@ -10,11 +10,17 @@ var NoUserFoundError = errors.New("no user found")
 var UserAlreadyExistsError = errors.New("user already exists")
 
 // InsertNewUser inserts a new user. When either the Username or the Email of the
-// user already exists, the functions returns an error
-func InsertNewUser(user *User) (*User, error) {
+// user already exists, the functions returns an UserAlreadyExistsError. If the insert
+// operation was successful, the given user will be extended by the ID from the
+// database.
+func InsertNewUser(user *User) error {
+	if user == nil {
+		return errors.New("user must not be nil")
+	}
+
 	passwordHash := user.PasswordHash()
 	if passwordHash == "" {
-		return nil, errors.New("can't insert user because of invalid password hash")
+		return errors.New("can't insert user because of invalid password hash")
 	}
 
 	user.Password = passwordHash
@@ -22,7 +28,7 @@ func InsertNewUser(user *User) (*User, error) {
 
 	database, err := getDatabase()
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
+		return errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
 	query := fmt.Sprintf("FOR u IN %s FILTER LOWER(u.email) == LOWER(@email) OR LOWER(u.username) == LOWER(@username) RETURN u", userCollectionName)
@@ -33,19 +39,19 @@ func InsertNewUser(user *User) (*User, error) {
 
 	cursor, err := database.Query(nil, query, bindings)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
+		return errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
 	if cursor.HasMore() {
 		fmt.Printf("WARN: user with username=%s or email=%s already exists\n", user.Username, user.Email)
-		return nil, UserAlreadyExistsError
+		return UserAlreadyExistsError
 	}
 
 	if err = CreateDocument(user); err != nil {
-		return nil, errors.Wrapf(err, "error while inserting new user: %+v", user)
+		return errors.Wrapf(err, "error while inserting new user: %+v", user)
 	}
 
-	return user, nil
+	return nil
 }
 
 // GetUserByEmail returns the user that matches with the given email

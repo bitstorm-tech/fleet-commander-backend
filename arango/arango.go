@@ -17,7 +17,7 @@ var (
 	arangoCollections = map[string]driver.Collection{}
 )
 
-var (
+const (
 	databaseName = "fleet-commander"
 	graphName    = "fleet-commander-graph"
 )
