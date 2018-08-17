@@ -36,12 +36,15 @@ func ConnectionHandler(w http.ResponseWriter, r *http.Request) {
 
 func KillInactiveConnections() {
 	for {
-		println("Kill inactive connections at", time.Now().Format(time.Stamp))
+		killedConnectionCount := 0
 		for _, player := range ConnectedPlayer {
 			if player.lastAction.After(time.Now().Add(60 * time.Minute)) {
 				player.connection.Close()
+				killedConnectionCount++
 			}
 		}
+
+		fmt.Printf("Kill %v inactive connections at %v\n", killedConnectionCount, time.Now().Format(time.Stamp))
 
 		time.Sleep(5 * time.Minute)
 	}

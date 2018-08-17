@@ -75,7 +75,7 @@ func GetUserByEmail(email string) (*User, error) {
 	user := new(User)
 	_, err = cursor.ReadDocument(nil, user)
 	if err != nil {
-		fmt.Println("ERROR: no user found with email:", email)
+		fmt.Println("No user found")
 		return nil, NoUserFoundError
 	}
 

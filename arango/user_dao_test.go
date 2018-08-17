@@ -9,7 +9,10 @@ func TestInsertUser(t *testing.T) {
 		t.SkipNow()
 	}
 
-	SetupFleetCommanderDatabase(true)
+	if err := SetupFleetCommanderDatabase(true); err != nil {
+		t.Errorf("Error while setup database")
+	}
+
 }
 
 func TestInsertInvalidUser(t *testing.T) {
@@ -17,16 +20,16 @@ func TestInsertInvalidUser(t *testing.T) {
 		t.SkipNow()
 	}
 
-	SetupFleetCommanderDatabase(true)
+	if err := SetupFleetCommanderDatabase(true); err != nil {
+		t.Errorf("Error while setup database")
+	}
 
-	err := InsertNewUser(nil)
-	if err == nil {
+	if err := InsertNewUser(nil); err == nil {
 		t.Error("Expected error but got nil")
 	}
 
 	user := new(User)
-	err = InsertNewUser(user)
-	if err == nil {
+	if err := InsertNewUser(user); err == nil {
 		t.Errorf("Expected error but got nil")
 	}
 }

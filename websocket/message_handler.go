@@ -51,7 +51,7 @@ func signIn(payload *json.RawMessage, player *connectedPlayer) {
 		player.SendMessage(NewSignInMessage())
 	}
 
-	if err != nil {
+	if err != nil && err != arango.NoUserFoundError {
 		fmt.Printf("%+v", err)
 	}
 }
@@ -64,7 +64,7 @@ func signUp(payload *json.RawMessage, player *connectedPlayer) {
 		return
 	}
 
-	user, err := arango.InsertNewUser(user)
+	err := arango.InsertNewUser(user)
 	if err != nil {
 		fmt.Printf("ERROR: can't insert new user \n%+v", err)
 		if err == arango.UserAlreadyExistsError {
