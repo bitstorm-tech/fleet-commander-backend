@@ -17,9 +17,9 @@ func NewErrorMessage(text string) *Message {
 	return &Message{
 		Type: ErrorType,
 		Payload: struct {
-			Text string `json:"text"`
+			Message string `json:"message"`
 		}{
-			Text: text,
+			Message: text,
 		},
 	}
 }
