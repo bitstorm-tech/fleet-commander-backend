@@ -28,10 +28,8 @@ func Setup() error {
 	if _, err := getClient(); err != nil {
 		return err
 	}
+
 	if _, err := getDatabase(); err != nil {
-		return err
-	}
-	if _, err := getGraph(); err != nil {
 		return err
 	}
 
@@ -81,23 +79,6 @@ func getDatabase() (driver.Database, error) {
 	}
 
 	return arangoDatabase, nil
-}
-
-func getGraph() (driver.Graph, error) {
-	if arangoGraph == nil {
-		fmt.Println("Initializing ArangoDB graph")
-		database, err := getDatabase()
-		if err != nil {
-			return nil, errors.Wrap(err, "error while getting graph")
-		}
-
-		arangoGraph, err = database.Graph(nil, graphName)
-		if err != nil {
-			return nil, errors.Wrap(err, "error while getting graph")
-		}
-	}
-
-	return arangoGraph, nil
 }
 
 func getCollection(name string) (driver.Collection, error) {

@@ -9,6 +9,6 @@ import (
 )
 
 func MonitoringHandler(w http.ResponseWriter, r *http.Request) {
-	info := "openConnections: " + strconv.Itoa(len(websocket.ConnectedPlayer))
+	info := "openConnections: " + strconv.Itoa(len(websocket.PlayerConnections))
 	w.Write([]byte(info))
 }

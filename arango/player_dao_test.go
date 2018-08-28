@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestInsertUser(t *testing.T) {
+func TestInsertPlayer(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -15,7 +15,7 @@ func TestInsertUser(t *testing.T) {
 
 }
 
-func TestInsertInvalidUser(t *testing.T) {
+func TestInsertInvalidPlayer(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -24,12 +24,12 @@ func TestInsertInvalidUser(t *testing.T) {
 		t.Errorf("Error while setup database")
 	}
 
-	if err := InsertNewUser(nil); err == nil {
+	if err := InsertNewPlayer(nil); err == nil {
 		t.Error("Expected error but got nil")
 	}
 
-	user := new(User)
-	if err := InsertNewUser(user); err == nil {
+	p := new(Player)
+	if err := InsertNewPlayer(p); err == nil {
 		t.Errorf("Expected error but got nil")
 	}
 }

@@ -9,93 +9,76 @@ import (
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 )
 
-func handleMessages(player *connectedPlayer) {
-	go heardBeat(player)
+func handleMessages(c *playerConnection) {
+	go heardBeat(c)
 
 	for {
-		message, err := player.NextMessage()
+		message, err := c.NextMessage()
 		if err != nil {
 			fmt.Printf("ERROR: can't read message from websocket \n%+v", err)
-			player.connection.Close()
+			c.connection.Close()
 			break
 		}
 
 		switch message.Type {
 		case SignInType:
-			signIn(message.Payload.(*json.RawMessage), player)
+			signIn(message.Payload.(*json.RawMessage), c)
 
 		case SignUpType:
-			signUp(message.Payload.(*json.RawMessage), player)
+			signUp(message.Payload.(*json.RawMessage), c)
 		}
 	}
 }
 
-func signIn(payload *json.RawMessage, player *connectedPlayer) {
-	user := new(arango.User)
-	if err := json.Unmarshal(*payload, user); err != nil {
+func signIn(payload *json.RawMessage, c *playerConnection) {
+	player := new(arango.Player)
+	if err := json.Unmarshal(*payload, player); err != nil {
 		fmt.Printf("ERROR: can't unmarshal sign in payload \n%+v", err)
-		player.SendTechnicalErrorMessage()
+		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	userFromDb, err := arango.GetUserByEmail(user.Email)
+	playerFromDb, err := arango.GetPlayerByEmail(player.Email)
 	if err != nil {
-		if err == arango.NoUserFoundError {
-			player.SendMessage(NewErrorMessage("Invalid credentials"))
+		if err == arango.NoPlayerFoundError {
+			c.SendMessage(NewErrorMessage("Invalid credentials"))
 		} else {
-			player.SendTechnicalErrorMessage()
+			c.SendTechnicalErrorMessage()
 		}
-	} else if user.PasswordHash() != userFromDb.Password {
-		player.SendMessage(NewErrorMessage("Invalid credentials"))
+	} else if player.PasswordHash() != playerFromDb.Password {
+		c.SendMessage(NewErrorMessage("Invalid credentials"))
 	} else {
-		player.SendMessage(NewSignInMessage())
+		c.SendMessage(NewSignInMessage())
 	}
 
-	if err != nil && err != arango.NoUserFoundError {
+	if err != nil && err != arango.NoPlayerFoundError {
 		fmt.Printf("%+v", err)
 	}
 }
 
-func signUp(payload *json.RawMessage, player *connectedPlayer) {
-	user := new(arango.User)
-	if err := json.Unmarshal(*payload, user); err != nil {
+func signUp(payload *json.RawMessage, c *playerConnection) {
+	player := new(arango.Player)
+	if err := json.Unmarshal(*payload, player); err != nil {
 		fmt.Printf("ERROR: can't unmarshal sign up payload \n%+v", err)
-		player.SendTechnicalErrorMessage()
+		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	err := arango.InsertNewUser(user)
+	err := arango.InsertNewPlayer(player)
 	if err != nil {
-		fmt.Printf("ERROR: can't insert new user \n%+v", err)
-		if err == arango.UserAlreadyExistsError {
-			player.SendMessage(NewErrorMessage("User already exists"))
+		fmt.Printf("ERROR: can't insert new player \n%+v", err)
+		if err == arango.PlayerAlreadyExistsError {
+			c.SendMessage(NewErrorMessage("Player already exists"))
 		} else {
-			player.SendTechnicalErrorMessage()
+			c.SendTechnicalErrorMessage()
 		}
 		return
 	}
 
-	resources := new(arango.Resources)
-	if err = arango.CreateDocument(resources); err != nil {
-		fmt.Printf("ERROR: can't create new resources \n%+v", err)
-		player.SendTechnicalErrorMessage()
-		arango.RemoveDocument(user)
-		return
-	}
-
-	err = arango.CreateEdge(user, resources, arango.EdgeHasResources)
-	if err != nil {
-		fmt.Printf("ERROR: can't create edge \n%+v", err)
-		arango.RemoveDocument(user)
-		arango.RemoveDocument(resources)
-		player.SendTechnicalErrorMessage()
-		return
-	}
-
-	player.SendMessage(NewSignUpMessage())
+	c.SendMessage(NewSignUpMessage())
 }
 
-func heardBeat(player *connectedPlayer) {
+func heardBeat(c *playerConnection) {
 	for {
 		time.Sleep(5 * time.Second)
 	}

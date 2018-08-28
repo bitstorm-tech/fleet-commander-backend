@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var ConnectedPlayer = make([]*connectedPlayer, 0)
+var PlayerConnections = make([]*playerConnection, 0)
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -25,19 +25,19 @@ func ConnectionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player := &connectedPlayer{
+	c := &playerConnection{
 		connection: connection,
 	}
 
-	ConnectedPlayer = append(ConnectedPlayer, player)
+	PlayerConnections = append(PlayerConnections, c)
 
-	go handleMessages(player)
+	go handleMessages(c)
 }
 
 func KillInactiveConnections() {
 	for {
 		killedConnectionCount := 0
-		for _, player := range ConnectedPlayer {
+		for _, player := range PlayerConnections {
 			if player.lastAction.After(time.Now().Add(60 * time.Minute)) {
 				player.connection.Close()
 				killedConnectionCount++

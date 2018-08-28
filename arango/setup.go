@@ -3,7 +3,6 @@ package arango
 import (
 	"fmt"
 
-	driver "github.com/arangodb/go-driver"
 	"github.com/pkg/errors"
 )
 
@@ -37,33 +36,10 @@ func SetupFleetCommanderDatabase(drop bool) error {
 		return errors.Wrap(err, "can't create database")
 	}
 
-	fmt.Println("Creating user collection ...")
-	_, err = database.CreateCollection(nil, userCollectionName, nil)
+	fmt.Println("Creating player collection ...")
+	_, err = database.CreateCollection(nil, playerCollectionName, nil)
 	if err != nil {
-		return errors.Wrap(err, "can't create user collection")
-	}
-
-	fmt.Println("Creating resource collection ...")
-	_, err = database.CreateCollection(nil, resourcesCollectionName, nil)
-	if err != nil {
-		return errors.Wrap(err, "can't create resource collection")
-	}
-
-	fmt.Println("Creating graph")
-	graph, err := database.CreateGraph(nil, graphName, nil)
-	if err != nil {
-		return errors.Wrap(err, "can't create graph")
-	}
-
-	vertexConstraints := driver.VertexConstraints{
-		From: []string{userCollectionName},
-		To:   []string{resourcesCollectionName},
-	}
-
-	fmt.Println("Creating hasResources edge collection")
-	_, err = graph.CreateEdgeCollection(nil, EdgeHasResources, vertexConstraints)
-	if err != nil {
-		return errors.Wrap(err, "can't create edge collection")
+		return errors.Wrap(err, "can't create player collection")
 	}
 
 	return nil
