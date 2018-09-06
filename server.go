@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"net/http"
 
@@ -15,10 +15,10 @@ import (
 )
 
 func main() {
-	fmt.Println("Server startup ...")
+	log.Println("Server startup ...")
 	err := arango.Setup()
 	if err != nil {
-		fmt.Printf("error while starting server %+v\n", err)
+		log.Printf("ERROR: %+v", err)
 		os.Exit(1)
 	}
 
@@ -29,6 +29,6 @@ func main() {
 	allowedHeaders := handlers.AllowedHeaders([]string{"x-requested-with", "authorization", "content-type", "Origin"})
 	corsEnabledRouter := handlers.CORS(allowedMethods, allowedHeaders)(router)
 	go websocket.KillInactiveConnections()
-	fmt.Println(http.ListenAndServe(":8080", corsEnabledRouter))
-	fmt.Println("Server shutdown ...")
+	log.Println(http.ListenAndServe(":8080", corsEnabledRouter))
+	log.Println("Server shutdown ...")
 }

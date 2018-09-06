@@ -1,9 +1,10 @@
 package arango
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/arangodb/go-driver"
+	driver "github.com/arangodb/go-driver"
+
 	"github.com/arangodb/go-driver/http"
 	"github.com/pkg/errors"
 )
@@ -38,7 +39,7 @@ func Setup() error {
 
 func getClient() (driver.Client, error) {
 	if arangoClient == nil {
-		fmt.Println("Initializing ArangoDB client")
+		log.Println("Initializing ArangoDB client")
 		endpoint := "http://localhost:8529"
 
 		connectionConfig := http.ConnectionConfig{
@@ -47,7 +48,7 @@ func getClient() (driver.Client, error) {
 
 		connection, err := http.NewConnection(connectionConfig)
 		if err != nil {
-			return nil, errors.Wrap(err, "error while getting client")
+			return nil, errors.WithStack(err)
 		}
 
 		clientConfig := driver.ClientConfig{
@@ -57,7 +58,7 @@ func getClient() (driver.Client, error) {
 
 		arangoClient, err = driver.NewClient(clientConfig)
 		if err != nil {
-			return nil, errors.Wrap(err, "error while getting client")
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -66,15 +67,15 @@ func getClient() (driver.Client, error) {
 
 func getDatabase() (driver.Database, error) {
 	if arangoDatabase == nil {
-		fmt.Println("Initializing ArangoDB database")
+		log.Println("Initializing ArangoDB database")
 		client, err := getClient()
 		if err != nil {
-			return nil, errors.Wrap(err, "error while getting database")
+			return nil, errors.WithStack(err)
 		}
 
 		arangoDatabase, err = client.Database(nil, databaseName)
 		if err != nil {
-			return nil, errors.Wrap(err, "error while getting database")
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -83,15 +84,15 @@ func getDatabase() (driver.Database, error) {
 
 func getCollection(name string) (driver.Collection, error) {
 	if arangoCollections[name] == nil {
-		fmt.Println("Initialize ArangoDB collection:", name)
+		log.Println("Initialize ArangoDB collection:", name)
 		database, err := getDatabase()
 		if err != nil {
-			return nil, errors.Wrapf(err, "error while getting collection '%s'", name)
+			return nil, errors.WithStack(err)
 		}
 
 		collection, err := database.Collection(nil, name)
 		if err != nil {
-			return nil, errors.Wrapf(err, "error while getting collection '%s'", name)
+			return nil, errors.WithStack(err)
 		}
 		arangoCollections[name] = collection
 	}

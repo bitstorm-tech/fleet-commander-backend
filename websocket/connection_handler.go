@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"time"
@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var PlayerConnections = make([]*playerConnection, 0)
+var ConnectedPlayer = make([]*connectedPlayer, 0)
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -20,16 +20,16 @@ var upgrader = websocket.Upgrader{
 func ConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	connection, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println("ERROR: can't open websocket connection:", err)
+		log.Printf("ERROR: %+v", err)
 		w.WriteHeader(500)
 		return
 	}
 
-	c := &playerConnection{
+	c := &connectedPlayer{
 		connection: connection,
 	}
 
-	PlayerConnections = append(PlayerConnections, c)
+	ConnectedPlayer = append(ConnectedPlayer, c)
 
 	go handleMessages(c)
 }
@@ -37,14 +37,14 @@ func ConnectionHandler(w http.ResponseWriter, r *http.Request) {
 func KillInactiveConnections() {
 	for {
 		killedConnectionCount := 0
-		for _, player := range PlayerConnections {
+		for _, player := range ConnectedPlayer {
 			if player.lastAction.After(time.Now().Add(60 * time.Minute)) {
 				player.connection.Close()
 				killedConnectionCount++
 			}
 		}
 
-		fmt.Printf("Kill %v inactive connections at %v\n", killedConnectionCount, time.Now().Format(time.Stamp))
+		log.Printf("Kill %v inactive connections", killedConnectionCount)
 
 		time.Sleep(5 * time.Minute)
 	}

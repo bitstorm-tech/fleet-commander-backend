@@ -7,12 +7,12 @@ import (
 func CreateDocument(p Persistable) error {
 	collection, err := getCollection(p.collection())
 	if err != nil {
-		return errors.Wrapf(err, "error while getting collection : '%s'", p.collection())
+		return errors.WithStack(err)
 	}
 
 	meta, err := collection.CreateDocument(nil, p)
 	if err != nil {
-		return errors.Wrapf(err, "error while creating document: %+v", p)
+		return errors.WithStack(err)
 	}
 
 	p.setKey(meta.Key)
@@ -23,12 +23,12 @@ func CreateDocument(p Persistable) error {
 func RemoveDocument(p Persistable) error {
 	collection, err := getCollection(p.collection())
 	if err != nil {
-		return errors.Wrapf(err, "error while removing document with key: %s", p.key())
+		return errors.WithStack(err)
 	}
 
 	_, err = collection.RemoveDocument(nil, p.key())
 	if err != nil {
-		return errors.Wrapf(err, "error while removing document: %s", p.key())
+		return errors.WithStack(err)
 	}
 
 	return nil

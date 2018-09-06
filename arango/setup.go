@@ -13,33 +13,33 @@ func SetupFleetCommanderDatabase(drop bool) error {
 	fmt.Println("Getting database ...")
 	database, err := getDatabase()
 	if err != nil {
-		return errors.Wrap(err, "can't get database")
+		return errors.WithStack(err)
 	}
 
 	if drop {
 		fmt.Println("Dropping database ...")
 		err = database.Remove(nil)
 		if err != nil {
-			return errors.Wrap(err, "can't drop database")
+			return errors.WithStack(err)
 		}
 	}
 
 	fmt.Println("Getting client ...")
 	client, err := getClient()
 	if err != nil {
-		return errors.Wrap(err, "can't get client")
+		return errors.WithStack(err)
 	}
 
 	fmt.Println("Creating database ...")
 	_, err = client.CreateDatabase(nil, databaseName, nil)
 	if err != nil {
-		return errors.Wrap(err, "can't create database")
+		return errors.WithStack(err)
 	}
 
 	fmt.Println("Creating player collection ...")
 	_, err = database.CreateCollection(nil, playerCollectionName, nil)
 	if err != nil {
-		return errors.Wrap(err, "can't create player collection")
+		return errors.WithStack(err)
 	}
 
 	return nil

@@ -19,7 +19,7 @@ func main() {
 
 	err := arango.SetupFleetCommanderDatabase(*drop)
 	if err != nil {
-		fmt.Printf("--- ERROR ---\n%+v", err)
+		fmt.Printf("--- ERROR ---\n%+v\n", err)
 	} else {
 		fmt.Println("--- DONE ---")
 	}

@@ -1,23 +1,22 @@
 package websocket
 
 import (
+	"log"
 	"time"
 
 	"encoding/json"
 
-	"fmt"
-
 	"github.com/gorilla/websocket"
 )
 
-type playerConnection struct {
+type connectedPlayer struct {
 	id         string
 	connection *websocket.Conn
 	lastAction time.Time
 	created    time.Time
 }
 
-func (c *playerConnection) NextMessage() (*Message, error) {
+func (c *connectedPlayer) NextMessage() (*Message, error) {
 	message := &Message{
 		Payload: &json.RawMessage{},
 	}
@@ -29,15 +28,15 @@ func (c *playerConnection) NextMessage() (*Message, error) {
 	return message, nil
 }
 
-func (c *playerConnection) SendMessage(message *Message) error {
+func (c *connectedPlayer) SendMessage(message *Message) error {
 	if err := c.connection.WriteJSON(message); err != nil {
-		fmt.Println("ERROR: can't write sign in answer:", err)
+		log.Printf("ERROR: %+v", err)
 		return err
 	}
 
 	return nil
 }
 
-func (c *playerConnection) SendTechnicalErrorMessage() {
+func (c *connectedPlayer) SendTechnicalErrorMessage() {
 	c.SendMessage(NewErrorMessage("Sorry, we have some problems with our engines, please try again later"))
 }

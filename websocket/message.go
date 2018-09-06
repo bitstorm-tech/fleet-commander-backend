@@ -13,20 +13,33 @@ type Message struct {
 	Payload interface{} `json:"payload,omitempty"`
 }
 
-func NewErrorMessage(text string) *Message {
+type ResourcesPayload struct {
+	Titanium int `json:"titanium"`
+	Fuel     int `json:"fuel"`
+	Energy   int `json:"energy"`
+}
+
+type MessagePayload struct {
+	Message string `json:"message"`
+}
+
+func NewErrorMessage(message string) *Message {
 	return &Message{
 		Type: ErrorType,
-		Payload: struct {
-			Message string `json:"message"`
-		}{
-			Message: text,
+		Payload: MessagePayload{
+			Message: message,
 		},
 	}
 }
 
-func NewSignInMessage() *Message {
+func NewSignInMessage(titanium int, fuel int, energy int) *Message {
 	return &Message{
 		Type: SignInType,
+		Payload: ResourcesPayload{
+			Titanium: titanium,
+			Fuel:     fuel,
+			Energy:   energy,
+		},
 	}
 }
 
@@ -39,11 +52,7 @@ func NewSignUpMessage() *Message {
 func NewCorrectionMessage(titanium int, fuel int, energy int) *Message {
 	return &Message{
 		Type: CorrectionType,
-		Payload: struct {
-			Titanium int
-			Fuel     int
-			Energy   int
-		}{
+		Payload: ResourcesPayload{
 			Titanium: titanium,
 			Fuel:     fuel,
 			Energy:   energy,
