@@ -1,5 +1,7 @@
 package websocket
 
+import "gitlab.com/fleet-commander/fleet-commander-backend-go/game"
+
 const (
 	ErrorType      = 0
 	SignUpType     = 1
@@ -13,33 +15,16 @@ type Message struct {
 	Payload interface{} `json:"payload,omitempty"`
 }
 
-type ResourcesPayload struct {
-	Titanium int `json:"titanium"`
-	Fuel     int `json:"fuel"`
-	Energy   int `json:"energy"`
-}
-
-type MessagePayload struct {
-	Message string `json:"message"`
-}
-
 func NewErrorMessage(message string) *Message {
 	return &Message{
-		Type: ErrorType,
-		Payload: MessagePayload{
-			Message: message,
-		},
+		Type:    ErrorType,
+		Payload: message,
 	}
 }
 
-func NewSignInMessage(titanium int, fuel int, energy int) *Message {
+func NewSignInMessage() *Message {
 	return &Message{
 		Type: SignInType,
-		Payload: ResourcesPayload{
-			Titanium: titanium,
-			Fuel:     fuel,
-			Energy:   energy,
-		},
 	}
 }
 
@@ -49,13 +34,9 @@ func NewSignUpMessage() *Message {
 	}
 }
 
-func NewCorrectionMessage(titanium int, fuel int, energy int) *Message {
+func NewCorrectionMessage(r game.Resources) *Message {
 	return &Message{
-		Type: CorrectionType,
-		Payload: ResourcesPayload{
-			Titanium: titanium,
-			Fuel:     fuel,
-			Energy:   energy,
-		},
+		Type:    CorrectionType,
+		Payload: r,
 	}
 }

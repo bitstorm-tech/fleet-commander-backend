@@ -2,19 +2,14 @@ package websocket
 
 import (
 	"encoding/json"
+	"github.com/pkg/errors"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/couchbase"
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/game"
 	"log"
 	"strings"
-
-	"github.com/pkg/errors"
-
-	"time"
-
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 )
 
 func handleMessages(c *connectedPlayer) {
-	go heardBeat(c)
-
 	for {
 		message, err := c.NextMessage()
 		if err != nil {
@@ -34,14 +29,14 @@ func handleMessages(c *connectedPlayer) {
 }
 
 func signIn(payload *json.RawMessage, c *connectedPlayer) {
-	player := new(arango.Player)
+	player := new(game.Player)
 	if err := json.Unmarshal(*payload, player); err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	playerFromDb, err := arango.GetPlayerByEmail(player.Email)
+	playerFromDb, err := couchbase.GetPlayerByEmail(player.Email)
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
@@ -55,16 +50,17 @@ func signIn(payload *json.RawMessage, c *connectedPlayer) {
 		return
 	}
 
-	if playerFromDb == nil || hash != playerFromDb.Password {
+	if hash != playerFromDb.Password {
 		c.SendMessage(NewErrorMessage("Invalid credentials"))
 		return
 	}
 
-	c.SendMessage(NewSignInMessage(0, 0, 0))
+	c.SendMessage(NewSignInMessage())
+	c.SendMessage(NewCorrectionMessage(playerFromDb.ActualResources()))
 }
 
 func signUp(payload *json.RawMessage, c *connectedPlayer) {
-	player := arango.Player{}
+	player := game.NewPlayer()
 	if err := json.Unmarshal(*payload, &player); err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
@@ -83,7 +79,7 @@ func signUp(payload *json.RawMessage, c *connectedPlayer) {
 		return
 	}
 
-	err = arango.InsertNewPlayer(player)
+	err = couchbase.InsertNewPlayer(player)
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
@@ -93,19 +89,12 @@ func signUp(payload *json.RawMessage, c *connectedPlayer) {
 	c.SendMessage(NewSignUpMessage())
 }
 
-func playerAlreadyExists(player arango.Player) (bool, error) {
-	playerFromDb, err := arango.GetPlayerByEmail(player.Email)
+func playerAlreadyExists(p game.Player) (bool, error) {
+	playerFromDb, err := couchbase.GetPlayerByEmail(p.Email)
 	if err != nil {
 		return false, errors.WithStack(err)
 	}
 
-	return playerFromDb != nil &&
-		strings.ToLower(playerFromDb.Email) == strings.ToLower(player.Email) &&
-		strings.ToLower(playerFromDb.Name) == strings.ToLower(player.Name), nil
-}
-
-func heardBeat(c *connectedPlayer) {
-	for {
-		time.Sleep(5 * time.Second)
-	}
+	return playerFromDb != nil && strings.ToLower(playerFromDb.Email) == strings.ToLower(p.Email) &&
+		strings.ToLower(playerFromDb.Name) == strings.ToLower(p.Name), nil
 }

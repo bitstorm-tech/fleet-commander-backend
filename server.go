@@ -5,22 +5,19 @@ import (
 
 	"net/http"
 
-	"os"
-
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/arango"
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/rest"
 	"gitlab.com/fleet-commander/fleet-commander-backend-go/websocket"
 )
 
 func main() {
 	log.Println("Server startup ...")
-	err := arango.Setup()
-	if err != nil {
-		log.Printf("ERROR: %+v", err)
-		os.Exit(1)
-	}
+	//err := arango.Setup()
+	//if err != nil {
+	//	log.Printf("ERROR: %+v", err)
+	//	os.Exit(1)
+	//}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/websocket", websocket.ConnectionHandler)
