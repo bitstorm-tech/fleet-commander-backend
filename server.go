@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gitlab.com/fleet-commander/fleet-commander-backend-go/couchbase"
 	"log"
 
 	"net/http"
@@ -12,12 +13,14 @@ import (
 )
 
 func main() {
+	//log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Server startup ...")
-	//err := arango.Setup()
-	//if err != nil {
-	//	log.Printf("ERROR: %+v", err)
-	//	os.Exit(1)
-	//}
+
+	rules, err := couchbase.GetGameRules()
+	if err != nil {
+		log.Panicf("Can't load game rules: %+v", err)
+	}
+	websocket.ActiveRules = rules
 
 	router := mux.NewRouter()
 	router.HandleFunc("/websocket", websocket.ConnectionHandler)

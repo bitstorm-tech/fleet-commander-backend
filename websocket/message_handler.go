@@ -9,28 +9,31 @@ import (
 	"strings"
 )
 
-func handleMessages(c *connectedPlayer) {
+var ActiveRules game.Rules
+
+func handleMessages(c connectedPlayer) {
 	for {
 		message, err := c.NextMessage()
 		if err != nil {
 			log.Printf("ERROR: %+v", err)
+			c.SendTechnicalErrorMessage()
 			c.connection.Close()
 			break
 		}
 
 		switch message.Type {
-		case SignInType:
+		case SignIn:
 			signIn(message.Payload.(*json.RawMessage), c)
 
-		case SignUpType:
+		case SignUp:
 			signUp(message.Payload.(*json.RawMessage), c)
 		}
 	}
 }
 
-func signIn(payload *json.RawMessage, c *connectedPlayer) {
-	player := new(game.Player)
-	if err := json.Unmarshal(*payload, player); err != nil {
+func signIn(payload *json.RawMessage, c connectedPlayer) {
+	player := game.NewPlayer()
+	if err := json.Unmarshal(*payload, &player); err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
@@ -50,16 +53,17 @@ func signIn(payload *json.RawMessage, c *connectedPlayer) {
 		return
 	}
 
-	if hash != playerFromDb.Password {
+	if playerFromDb == nil || hash != playerFromDb.Password {
 		c.SendMessage(NewErrorMessage("Invalid credentials"))
 		return
 	}
 
 	c.SendMessage(NewSignInMessage())
+	c.SendMessage(NewGameRulesMessage())
 	c.SendMessage(NewCorrectionMessage(playerFromDb.ActualResources()))
 }
 
-func signUp(payload *json.RawMessage, c *connectedPlayer) {
+func signUp(payload *json.RawMessage, c connectedPlayer) {
 	player := game.NewPlayer()
 	if err := json.Unmarshal(*payload, &player); err != nil {
 		log.Printf("ERROR: %+v", err)
@@ -95,6 +99,6 @@ func playerAlreadyExists(p game.Player) (bool, error) {
 		return false, errors.WithStack(err)
 	}
 
-	return playerFromDb != nil && strings.ToLower(playerFromDb.Email) == strings.ToLower(p.Email) &&
+	return strings.ToLower(playerFromDb.Email) == strings.ToLower(p.Email) &&
 		strings.ToLower(playerFromDb.Name) == strings.ToLower(p.Name), nil
 }

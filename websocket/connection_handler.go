@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var ConnectedPlayer = make([]*connectedPlayer, 0)
+var ConnectedPlayer = make([]connectedPlayer, 0)
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -25,7 +25,7 @@ func ConnectionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := &connectedPlayer{
+	c := connectedPlayer{
 		connection: connection,
 	}
 

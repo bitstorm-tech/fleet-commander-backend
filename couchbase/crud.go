@@ -53,6 +53,34 @@ func Insert(p Persistable) error {
 	return nil
 }
 
+func Delete(p Persistable) error {
+	bucket, err := getBucket(p.BucketName())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = bucket.Remove(p.ID(), 0)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func Get(p Persistable) error {
+	bucket, err := getBucket(p.BucketName())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = bucket.Get(p.ID(), p)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
 type Persistable interface {
 	BucketName() string
 	ID() string

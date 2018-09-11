@@ -2,41 +2,51 @@ package websocket
 
 import "gitlab.com/fleet-commander/fleet-commander-backend-go/game"
 
+type MessageType string
+
 const (
-	ErrorType      = 0
-	SignUpType     = 1
-	SignInType     = 2
-	SignOutType    = 3
-	CorrectionType = 4
+	Error      MessageType = "error"
+	SignUp     MessageType = "sign_up"
+	SignIn     MessageType = "sign_in"
+	SignOut    MessageType = "sign_out"
+	Correction MessageType = "correction"
+	GameRules  MessageType = "game_rules"
 )
 
 type Message struct {
-	Type    int         `json:"type"`
+	Type    MessageType `json:"type"`
 	Payload interface{} `json:"payload,omitempty"`
 }
 
-func NewErrorMessage(message string) *Message {
-	return &Message{
-		Type:    ErrorType,
+func NewErrorMessage(message string) Message {
+	return Message{
+		Type:    Error,
 		Payload: message,
 	}
 }
 
-func NewSignInMessage() *Message {
-	return &Message{
-		Type: SignInType,
+func NewSignInMessage() Message {
+	return Message{
+		Type: SignIn,
 	}
 }
 
-func NewSignUpMessage() *Message {
-	return &Message{
-		Type: SignUpType,
+func NewSignUpMessage() Message {
+	return Message{
+		Type: SignUp,
 	}
 }
 
-func NewCorrectionMessage(r game.Resources) *Message {
-	return &Message{
-		Type:    CorrectionType,
+func NewCorrectionMessage(r game.Resources) Message {
+	return Message{
+		Type:    Correction,
 		Payload: r,
+	}
+}
+
+func NewGameRulesMessage() Message {
+	return Message{
+		Type:    GameRules,
+		Payload: ActiveRules,
 	}
 }
