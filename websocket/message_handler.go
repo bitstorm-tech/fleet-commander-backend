@@ -32,28 +32,28 @@ func handleMessages(c connectedPlayer) {
 }
 
 func signIn(payload *json.RawMessage, c connectedPlayer) {
-	player := game.NewPlayer()
-	if err := json.Unmarshal(*payload, &player); err != nil {
+	login := game.Login{}
+	if err := json.Unmarshal(*payload, &login); err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	playerFromDb, err := couchbase.GetPlayerByEmail(player.Email)
+	playerFromDb, err := couchbase.GetPlayerByEmail(login.Email)
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	hash, err := player.PasswordHash()
+	hash, err := login.PasswordHash()
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	if playerFromDb == nil || hash != playerFromDb.Password {
+	if playerFromDb == nil || hash != playerFromDb.Login.Password {
 		c.SendMessage(NewErrorMessage("Invalid credentials"))
 		return
 	}
@@ -64,14 +64,14 @@ func signIn(payload *json.RawMessage, c connectedPlayer) {
 }
 
 func signUp(payload *json.RawMessage, c connectedPlayer) {
-	player := game.NewPlayer()
-	if err := json.Unmarshal(*payload, &player); err != nil {
+	login := game.Login{}
+	if err := json.Unmarshal(*payload, &login); err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
 		return
 	}
 
-	exists, err := playerAlreadyExists(player)
+	exists, err := playerAlreadyExists(login)
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
@@ -83,7 +83,7 @@ func signUp(payload *json.RawMessage, c connectedPlayer) {
 		return
 	}
 
-	err = couchbase.InsertNewPlayer(player)
+	err = couchbase.InsertNewPlayerWithLogin(login)
 	if err != nil {
 		log.Printf("ERROR: %+v", err)
 		c.SendTechnicalErrorMessage()
@@ -93,12 +93,12 @@ func signUp(payload *json.RawMessage, c connectedPlayer) {
 	c.SendMessage(NewSignUpMessage())
 }
 
-func playerAlreadyExists(p game.Player) (bool, error) {
-	playerFromDb, err := couchbase.GetPlayerByEmail(p.Email)
+func playerAlreadyExists(l game.Login) (bool, error) {
+	playerFromDb, err := couchbase.GetPlayerByEmail(l.Email)
 	if err != nil {
 		return false, errors.WithStack(err)
 	}
 
-	return strings.ToLower(playerFromDb.Email) == strings.ToLower(p.Email) &&
-		strings.ToLower(playerFromDb.Name) == strings.ToLower(p.Name), nil
+	return playerFromDb != nil && strings.ToLower(playerFromDb.Login.Email) == strings.ToLower(l.Email) &&
+		strings.ToLower(playerFromDb.Login.Name) == strings.ToLower(l.Name), nil
 }

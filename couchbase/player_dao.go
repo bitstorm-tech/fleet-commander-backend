@@ -8,21 +8,23 @@ import (
 	"strings"
 )
 
-func InsertNewPlayer(p game.Player) error {
-	passwordHash, err := p.PasswordHash()
+func InsertNewPlayerWithLogin(l game.Login) error {
+	passwordHash, err := l.PasswordHash()
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	p.Password = passwordHash
-	log.Println("insert new player:", p)
+	l.Password = passwordHash
+	log.Println("insert new player with login:", l)
 
 	bucket, err := getBucket("fc-player")
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	_, err = bucket.Insert(strings.ToLower(p.Email), p, 0)
+	p := game.NewPlayer()
+	p.Login = l
+	_, err = bucket.Insert(strings.ToLower(l.Email), p, 0)
 	if err != nil {
 		return errors.WithStack(err)
 	}

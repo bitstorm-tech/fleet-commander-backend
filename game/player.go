@@ -9,23 +9,33 @@ import (
 
 // Player is the structure represents a player from the database
 type Player struct {
-	Name      string    `json:"name"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-	Resources Resources `json:"resources"`
-	Ships     Ships     `json:"ships"`
+	Login      Login      `json:"login"`
+	Resources  Resources  `json:"resources"`
+	Ships      Ships      `json:"ships"`
+	MotherShip MotherShip `json:"motherShip"`
+}
+
+type Login struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 type Ships struct {
-	TitaniumHarvester int `json:"titaniumHarvester"`
-	FuelHarvester     int `json:"fuelHarvester"`
-	EnergyHarvester   int `json:"energyHarvester"`
+	TitaniumHarvester []int `json:"titaniumHarvester"`
+	FuelHarvester     []int `json:"fuelHarvester"`
+}
+
+type MotherShip struct {
+	EnergyPerMinute   int `json:"energyPerMinute"`
+	TitaniumPerMinute int `json:"titaniumPerMinute"`
+	FuelPerMinute     int `json:"fuelPerMinute"`
 }
 
 // PasswordHash returns the players password as hex encoded SHA-512 hash string
-func (p Player) PasswordHash() (string, error) {
+func (l Login) PasswordHash() (string, error) {
 	sha := crypto.SHA512.New()
-	if _, err := sha.Write([]byte(p.Password)); err != nil {
+	if _, err := sha.Write([]byte(l.Password)); err != nil {
 		return "", errors.WithStack(err)
 	}
 
@@ -57,5 +67,5 @@ func (Player) BucketName() string {
 }
 
 func (p Player) ID() string {
-	return p.Email
+	return p.Login.Email
 }
