@@ -1,15 +1,15 @@
 package main
 
 import (
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/couchbase"
+	"github.com/bugjoe/fleet-commander-backend/couchbase"
+	"github.com/bugjoe/fleet-commander-backend/rest"
+	"github.com/bugjoe/fleet-commander-backend/websocket"
 	"log"
 
 	"net/http"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/rest"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/websocket"
 )
 
 func main() {

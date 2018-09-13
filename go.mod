@@ -1,4 +1,4 @@
-module gitlab.com/fleet-commander/fleet-commander-backend-go
+module github.com/bugjoe/fleet-commander-backend
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -1,6 +1,6 @@
 package websocket
 
-import "gitlab.com/fleet-commander/fleet-commander-backend-go/game"
+import "github.com/bugjoe/fleet-commander-backend/game"
 
 type MessageType string
 

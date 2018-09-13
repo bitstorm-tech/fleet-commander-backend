@@ -1,11 +1,9 @@
 package rest
 
 import (
+	"github.com/bugjoe/fleet-commander-backend/websocket"
 	"net/http"
-
 	"strconv"
-
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/websocket"
 )
 
 func MonitoringHandler(w http.ResponseWriter, r *http.Request) {

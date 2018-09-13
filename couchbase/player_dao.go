@@ -1,8 +1,8 @@
 package couchbase
 
 import (
+	"github.com/bugjoe/fleet-commander-backend/game"
 	"github.com/pkg/errors"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/game"
 	"gopkg.in/couchbase/gocb.v1"
 	"log"
 	"strings"

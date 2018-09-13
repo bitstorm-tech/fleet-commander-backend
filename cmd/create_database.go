@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/couchbase"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/game"
+	"github.com/bugjoe/fleet-commander-backend/couchbase"
+	"github.com/bugjoe/fleet-commander-backend/game"
 )
 
 var rules = game.Rules{

@@ -2,9 +2,9 @@ package websocket
 
 import (
 	"encoding/json"
+	"github.com/bugjoe/fleet-commander-backend/couchbase"
+	"github.com/bugjoe/fleet-commander-backend/game"
 	"github.com/pkg/errors"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/couchbase"
-	"gitlab.com/fleet-commander/fleet-commander-backend-go/game"
 	"log"
 	"strings"
 )
