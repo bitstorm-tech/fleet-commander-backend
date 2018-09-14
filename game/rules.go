@@ -1,21 +1,17 @@
 package game
 
+var ActiveRules Rules
+
 type Rules struct {
-	TitaniumHarvester []ShipRule `json:"titaniumHarvester"`
-	FuelHarvester     []ShipRule `json:"fuelHarvester"`
+	TitaniumHarvester ShipRule `json:"titaniumHarvester"`
+	FuelHarvester     ShipRule `json:"fuelHarvester"`
 }
 
 type ShipRule struct {
-	Level            int `json:"level"`
 	TitaniumCost     int `json:"titaniumCost"`
 	FuelCost         int `json:"fuelCost"`
 	HarvestPerMinute int `json:"harvestPerMinute"`
 	HitPoints        int `json:"hitPoints"`
-}
-
-func (r *ShipRule) WithLevel(l int) *ShipRule {
-	r.Level = l
-	return r
 }
 
 func (r *ShipRule) WithTitaniumCost(c int) *ShipRule {

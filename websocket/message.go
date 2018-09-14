@@ -9,8 +9,10 @@ const (
 	SignUp     MessageType = "sign_up"
 	SignIn     MessageType = "sign_in"
 	SignOut    MessageType = "sign_out"
-	Correction MessageType = "correction"
 	GameRules  MessageType = "game_rules"
+	Resources  MessageType = "resources"
+	Ships      MessageType = "ships"
+	MotherShip MessageType = "mother_ship"
 )
 
 type Message struct {
@@ -37,16 +39,30 @@ func NewSignUpMessage() Message {
 	}
 }
 
-func NewCorrectionMessage(r game.Resources) Message {
+func NewGameRulesMessage() Message {
 	return Message{
-		Type:    Correction,
+		Type:    GameRules,
+		Payload: game.ActiveRules,
+	}
+}
+
+func NewResourcesMessage(r game.Resources) Message {
+	return Message{
+		Type:    Resources,
 		Payload: r,
 	}
 }
 
-func NewGameRulesMessage() Message {
+func NewShipsMessage(s game.Ships) Message {
 	return Message{
-		Type:    GameRules,
-		Payload: ActiveRules,
+		Type:    Ships,
+		Payload: s,
+	}
+}
+
+func NewMotherShipMessage(m game.MotherShip) Message {
+	return Message{
+		Type:    MotherShip,
+		Payload: m,
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/bugjoe/fleet-commander-backend/couchbase"
+	"github.com/bugjoe/fleet-commander-backend/game"
 	"github.com/bugjoe/fleet-commander-backend/rest"
 	"github.com/bugjoe/fleet-commander-backend/websocket"
 	"log"
@@ -20,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Panicf("Can't load game rules: %+v", err)
 	}
-	websocket.ActiveRules = rules
+	game.ActiveRules = rules
 
 	router := mux.NewRouter()
 	router.HandleFunc("/websocket", websocket.ConnectionHandler)

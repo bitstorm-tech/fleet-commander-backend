@@ -21,9 +21,16 @@ type Login struct {
 	Email    string `json:"email"`
 }
 
+type Resources struct {
+	Titanium   int       `json:"titanium"`
+	Fuel       int       `json:"fuel"`
+	Energy     int       `json:"energy"`
+	LastUpdate time.Time `json:"lastUpdate"`
+}
+
 type Ships struct {
-	TitaniumHarvester []int `json:"titaniumHarvester"`
-	FuelHarvester     []int `json:"fuelHarvester"`
+	TitaniumHarvester int `json:"titaniumHarvester"`
+	FuelHarvester     int `json:"fuelHarvester"`
 }
 
 type MotherShip struct {
@@ -59,6 +66,12 @@ func (p Player) ActualResources() Resources {
 func NewPlayer() Player {
 	p := Player{}
 	p.Resources.LastUpdate = time.Now()
+	p.MotherShip.EnergyPerMinute = 1
+	p.MotherShip.TitaniumPerMinute = 10
+	p.MotherShip.FuelPerMinute = 10
+	p.Ships.TitaniumHarvester = 10
+	p.Ships.FuelHarvester = 10
+
 	return p
 }
 

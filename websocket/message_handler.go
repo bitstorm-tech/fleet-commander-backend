@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var ActiveRules game.Rules
-
 func handleMessages(c connectedPlayer) {
 	for {
 		message, err := c.NextMessage()
@@ -60,7 +58,9 @@ func signIn(payload *json.RawMessage, c connectedPlayer) {
 
 	c.SendMessage(NewSignInMessage())
 	c.SendMessage(NewGameRulesMessage())
-	c.SendMessage(NewCorrectionMessage(playerFromDb.ActualResources()))
+	c.SendMessage(NewResourcesMessage(playerFromDb.ActualResources()))
+	c.SendMessage(NewShipsMessage(playerFromDb.Ships))
+	c.SendMessage(NewMotherShipMessage(playerFromDb.MotherShip))
 }
 
 func signUp(payload *json.RawMessage, c connectedPlayer) {
