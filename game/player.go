@@ -1,9 +1,6 @@
 package game
 
 import (
-	"crypto"
-	"fmt"
-	"github.com/pkg/errors"
 	"time"
 )
 
@@ -15,50 +12,29 @@ type Player struct {
 	MotherShip MotherShip `json:"motherShip"`
 }
 
-type Login struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
-
-type Resources struct {
-	Titanium   int       `json:"titanium"`
-	Fuel       int       `json:"fuel"`
-	Energy     int       `json:"energy"`
-	LastUpdate time.Time `json:"lastUpdate"`
-}
-
-type Ships struct {
-	TitaniumHarvester int `json:"titaniumHarvester"`
-	FuelHarvester     int `json:"fuelHarvester"`
-}
-
-type MotherShip struct {
-	EnergyPerMinute   int `json:"energyPerMinute"`
-	TitaniumPerMinute int `json:"titaniumPerMinute"`
-	FuelPerMinute     int `json:"fuelPerMinute"`
-}
-
-// PasswordHash returns the players password as hex encoded SHA-512 hash string
-func (l Login) PasswordHash() (string, error) {
-	sha := crypto.SHA512.New()
-	if _, err := sha.Write([]byte(l.Password)); err != nil {
-		return "", errors.WithStack(err)
-	}
-
-	hash := sha.Sum(nil)
-
-	return fmt.Sprintf("%x", hash), nil
-}
-
 // ActualResources calculates the actual resources of the player and returns them.
+// These resources are the resources from the mother ship plus the resources from the
+// harvesters since the last update time.
 // The actual resources are only temporary and will not be stored in the database.
 func (p Player) ActualResources() Resources {
-	deltaTimeSeconds := int(time.Now().Sub(p.Resources.LastUpdate).Seconds())
-	p.Resources.Titanium += deltaTimeSeconds
-	p.Resources.Fuel += deltaTimeSeconds
-	p.Resources.Energy += deltaTimeSeconds
-	return p.Resources
+	deltaTimeMinutes := int(time.Now().Sub(p.Resources.LastUpdate).Seconds() / 60)
+
+	return p.calcResourcesFromMotherShip(deltaTimeMinutes).Add(p.calcResourcesFromHarvester(deltaTimeMinutes))
+}
+
+func (p Player) calcResourcesFromMotherShip(d int) Resources {
+	return Resources{
+		Titanium: d * p.MotherShip.TitaniumPerMinute,
+		Fuel:     d * p.MotherShip.FuelPerMinute,
+		Energy:   d * p.MotherShip.EnergyPerMinute,
+	}
+}
+
+func (p Player) calcResourcesFromHarvester(d int) Resources {
+	return Resources{
+		Titanium: d * p.Ships.TitaniumHarvester,
+		Fuel:     d * p.Ships.FuelHarvester,
+	}
 }
 
 // NewPlayer returns a new player which resource last update time is
