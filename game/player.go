@@ -17,24 +17,11 @@ type Player struct {
 // harvesters since the last update time.
 // The actual resources are only temporary and will not be stored in the database.
 func (p Player) ActualResources() Resources {
-	deltaTimeMinutes := int(time.Now().Sub(p.Resources.LastUpdate).Seconds() / 60)
+	deltaMinutes := time.Now().Sub(p.Resources.LastUpdate).Minutes()
+	m := p.MotherShip.CalcResources(deltaMinutes)
+	h := p.Ships.CalcResources(deltaMinutes)
 
-	return p.calcResourcesFromMotherShip(deltaTimeMinutes).Add(p.calcResourcesFromHarvester(deltaTimeMinutes))
-}
-
-func (p Player) calcResourcesFromMotherShip(d int) Resources {
-	return Resources{
-		Titanium: d * p.MotherShip.TitaniumPerMinute,
-		Fuel:     d * p.MotherShip.FuelPerMinute,
-		Energy:   d * p.MotherShip.EnergyPerMinute,
-	}
-}
-
-func (p Player) calcResourcesFromHarvester(d int) Resources {
-	return Resources{
-		Titanium: d * p.Ships.TitaniumHarvester,
-		Fuel:     d * p.Ships.FuelHarvester,
-	}
+	return m.Add(h)
 }
 
 // NewPlayer returns a new player which resource last update time is
